@@ -1,0 +1,24 @@
+// Hipótese: path traversal no /download do lab/app.py faz o processo python
+//           ler arquivos fora da pasta files/ (configs, chaves, bancos).
+// MITRE ATT&CK: T1190, T1552.001 (Credentials In Files)
+// ISO/IEC 27001:2022: 8.3 Restrição de acesso à informação, 8.16  |  NIST CSF 2.0: PR.AA, DE.CM
+// Observação: leitura de arquivo nem sempre é registrada pelo Defender for Endpoint;
+//             use também o log da aplicação. Por isso a consulta busca o acesso
+//             via DeviceEvents e a criação/alteração via DeviceFileEvents.
+let ArquivosSensiveis = dynamic([".env","id_rsa","web.config","appsettings.json","lab.db","SAM","shadow","passwd"]);
+union
+(
+    DeviceFileEvents
+    | where Timestamp > ago(7d)
+    | where InitiatingProcessFileName in~ ("python.exe","python3.exe","python","python3")
+    | where FileName has_any (ArquivosSensiveis)
+),
+(
+    DeviceEvents
+    | where Timestamp > ago(7d)
+    | where ActionType == "SensitiveFileRead"
+    | where InitiatingProcessFileName in~ ("python.exe","python3.exe","python","python3")
+)
+| project Timestamp, DeviceId, DeviceName, ReportId, ActionType,
+          FolderPath, FileName, InitiatingProcessCommandLine
+| order by Timestamp desc
