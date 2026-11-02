@@ -1,47 +1,53 @@
 ---
 name: compliance-mapping
-description: Use quando o estudante quiser saber qual controle da ISO/IEC 27001:2022 ou categoria do NIST CSF 2.0 cobre um risco, achado ou processo, montar um gap analysis, uma linha da Declaração de Aplicabilidade ou a lista de evidências para auditoria.
+description: Use quando o estudante quiser saber qual categoria do NIST CSF 2.0, controle do CIS Controls v8.1 ou prática do NIST SSDF cobre um risco, achado ou processo, montar um gap analysis (perfil atual × alvo) ou a lista de evidências para uma avaliação. A ISO 27001 entra só como equivalência de referência.
 ---
 
-# Skill: Mapeamento de compliance (ISO 27001 + NIST CSF)
+# Skill: Mapeamento de controles (NIST CSF + CIS Controls)
 
-Traduz linguagem técnica em linguagem de governança, e vice-versa.
+Traduz linguagem técnica em linguagem de governança, e vice-versa, usando frameworks públicos.
 
 ## Quando usar
 
-"Qual controle da ISO cobre isso?", "Como provo isso pro auditor?", "Monta um gap analysis", "O que é SoA?". Se o estudante quiser entender a norma do zero, combine com `explain-concept`.
+"Qual controle cobre isso?", "Como provo isso numa avaliação?", "Monta um gap analysis", "O que é um Profile do CSF?". Se o estudante quiser entender um framework do zero, combine com `explain-concept`.
 
 ## Processo
 
 ### 1. Perguntas de contexto (uma por vez)
 
-1. **Objetivo:** certificação ISO 27001, adequação ao NIST CSF, auditoria interna ou estudo?
-2. **Escopo:** qual parte da organização/sistema está em análise? (ex.: "a aplicação web e o SOC")
+1. **Objetivo:** adequação ao NIST CSF, implantação do CIS Controls, avaliação interna ou estudo?
+2. **Escopo:** qual parte da organização/sistema está em análise? (ex.: "a aplicação web e o monitoramento")
 3. **Maturidade atual:** já existe política, ferramenta ou registro para o tema?
+
+Se a empresa do estudante já usa ISO 27001, anote: no fim você indica a equivalência.
 
 ### 2. Mapeie
 
-Use `agent/knowledge/iso27001-annex-a.md` e `agent/knowledge/nist-csf-ssdf.md`. Para cada item, entregue:
+Use `agent/knowledge/nist-csf-ssdf.md` e `agent/knowledge/frameworks-referencia.md`. Para cada item, entregue:
 
-| Risco/achado | Controle ISO 27001:2022 | NIST CSF 2.0 | Situação (atende / parcial / não atende) | Evidência esperada | Ação |
-|--------------|-------------------------|--------------|------------------------------------------|--------------------|------|
+| Risco/achado | Severidade | NIST CSF 2.0 | CIS Controls v8.1 | NIST SSDF (se for desenvolvimento) | Situação (atende / parcial / não atende) | Evidência esperada | Ação |
+|--------------|------------|--------------|-------------------|------------------------------------|------------------------------------------|--------------------|------|
 
-Explique em uma frase por que aquele controle se aplica.
+A severidade vem da matriz de `agent/knowledge/risk-scoring.md`. Explique em uma frase por que aquele controle se aplica.
 
-### 3. Pense como auditor
+### 3. Pense como avaliador
 
 Para cada controle, verifique as 4 perguntas: está documentado? implementado? operando (há registros)? é melhorado? Aponte qual delas falha.
 
 ### 4. Conecte com a técnica
 
-Quando possível, mostre como o Microsoft Defender gera evidência (ex.: regra de detecção personalizada → 8.16; Defender Vulnerability Management → 8.8; histórico de incidentes → 5.26/5.27).
+Mostre como a prática técnica gera evidência, sem depender de ferramenta específica: regra Sigma versionada e ativa → DE.CM / CIS 8 e 13; varredura de dependências no pipeline → ID.RA / CIS 7; teste de segurança automatizado → PR.PS / SSDF PW.8 / CIS 16; registro de incidentes e lições aprendidas → RS.MA, ID.IM / CIS 17.
 
-### 5. Feche
+### 5. Equivalência (só se pedirem)
 
-Resuma em 3 linhas para um gestor (risco, impacto, ação) e lembre que a decisão de aceitar risco ou declarar conformidade é humana.
+Se a organização usa ISO 27001, acrescente uma coluna com o tema equivalente do Anexo A, usando a tabela de referência de `frameworks-referencia.md`, e avise que é um atalho didático.
+
+### 6. Feche
+
+Resuma em 3 linhas para um gestor (risco, impacto, ação) e lembre que a decisão de aceitar risco ou declarar adequação é humana.
 
 ## Lembre-se
 
-- Não reproduza o texto oficial da ISO (é protegido por direitos autorais); parafraseie.
-- Se não tiver certeza do número do controle, diga e oriente a conferir na norma.
+- Cite o número do controle CIS com segurança; o número de uma salvaguarda, só se conferir na publicação oficial.
+- Não reproduza texto de normas pagas; parafraseie.
 - Compliance não é segurança: um controle "no papel" sem evidência operando não atende.
