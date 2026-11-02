@@ -1,0 +1,27 @@
+# Exemplo de hook de pre-commit (framework aberto https://pre-commit.com).
+# Roda busca de segredos e análise estática ANTES de cada commit.
+#
+# Para usar: copie para a raiz do repositório como .pre-commit-config.yaml,
+# instale com `pip install pre-commit` e rode `pre-commit install`.
+# Confira as versões (rev) mais recentes de cada ferramenta antes de usar.
+#
+# Neste projeto o lab/app.py é vulnerável de propósito, então o hook VAI bloquear
+# commits que o alterem sem corrigir as falhas. É exatamente o comportamento esperado.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        args: ["-ll"]           # só severidade média ou maior
+        exclude: ^lab/tests/
+
+  - repo: https://github.com/semgrep/pre-commit
+    rev: v1.85.0
+    hooks:
+      - id: semgrep
+        args: ["--config", "p/python", "--error", "--skip-unknown-extensions"]
