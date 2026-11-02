@@ -1,0 +1,33 @@
+title: Sintaxe de template no parâmetro name da rota /hello
+id: 6de24e62-c47b-4b44-adda-d92dd3e4b205
+status: experimental
+description: |
+  Hipótese: quem tenta explorar o SSTI do /hello do lab/app.py manda
+  delimitadores de template Jinja2 no parâmetro name. O log de acesso do
+  proxy registra isso antes de qualquer execução.
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://cwe.mitre.org/data/definitions/1336.html
+author: DIO Agent SecOps Expert
+date: 2026-11-02
+tags:
+  - attack.initial-access
+  - attack.t1190
+logsource:
+  category: webserver
+detection:
+  selection_rota:
+    cs-uri-stem|endswith: '/hello'
+  selection_template:
+    cs-uri-query|contains:
+      - '{{'
+      - '%7B%7B'
+      - '%7b%7b'
+      - '{%'
+      - '%7B%25'
+      - '%7b%25'
+  condition: selection_rota and selection_template
+falsepositives:
+  - Varreduras autorizadas do próprio time; nomes legítimos não têm {{ nem {%
+level: high
+# NIST CSF 2.0: DE.CM, DE.AE  |  CIS Controls v8.1: 8, 13

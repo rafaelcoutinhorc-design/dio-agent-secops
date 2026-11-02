@@ -1,0 +1,48 @@
+title: Processo Python de app web iniciando shell ou ferramenta de reconhecimento
+id: b22093da-6084-4488-99ef-a46845d5fd94
+status: experimental
+description: |
+  Hipótese: se o /ping do lab/app.py sofrer command injection, o processo python
+  vai iniciar um shell (sh, bash, cmd) ou uma ferramenta de reconhecimento.
+  O código vulnerável já chama o ping via shell, então o ping simples é filtrado.
+  Depois da correção (subprocess sem shell), qualquer shell filho do python é sinal forte.
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://attack.mitre.org/techniques/T1059/
+author: DIO Agent SecOps Expert
+date: 2026-11-02
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.execution
+  - attack.t1059.004
+  - attack.t1059.003
+logsource:
+  category: process_creation
+detection:
+  selection_pai:
+    ParentImage|endswith:
+      - '/python'
+      - '/python3'
+      - '\python.exe'
+      - '\python3.exe'
+  selection_filho:
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+      - '/dash'
+      - '/whoami'
+      - '/id'
+      - '/curl'
+      - '/wget'
+      - '\cmd.exe'
+      - '\whoami.exe'
+      - '\curl.exe'
+  filter_ping_legitimo:
+    # o ping simples que o app vulnerável executa, sem separadores de comando
+    CommandLine|re: '^\S*(sh|cmd(\.exe)?)"?\s+(-c|/c)\s+"?ping(\.exe)?\s+-[nc]\s+1\s+[\w.\-]+"?\s*$'
+  condition: selection_pai and selection_filho and not filter_ping_legitimo
+falsepositives:
+  - Scripts administrativos em Python que chamam o shell de propósito (liste e exclua pelo caminho do script)
+level: high
+# NIST CSF 2.0: DE.CM, DE.AE  |  CIS Controls v8.1: 8, 13

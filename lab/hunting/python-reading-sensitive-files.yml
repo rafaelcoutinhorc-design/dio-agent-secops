@@ -1,0 +1,42 @@
+title: Processo Python lendo arquivo sensível
+id: 65d5b0c1-a7f0-4a88-8a65-08519928298a
+status: experimental
+description: |
+  Hipótese: o path traversal do /download do lab/app.py faz o processo python
+  ler arquivos fora da pasta files/ (variáveis de ambiente, chaves, banco, contas).
+  Exige auditoria de acesso a arquivos habilitada no sistema (ex.: regras do auditd
+  para os caminhos abaixo). Sem essa telemetria, use a regra web-path-traversal-download.
+references:
+  - https://attack.mitre.org/techniques/T1552/001/
+author: DIO Agent SecOps Expert
+date: 2026-11-02
+tags:
+  - attack.credential-access
+  - attack.t1552.001
+logsource:
+  category: file_access
+detection:
+  selection_processo:
+    Image|endswith:
+      - '/python'
+      - '/python3'
+      - '\python.exe'
+      - '\python3.exe'
+  selection_arquivo:
+    TargetFilename|endswith:
+      - '/.env'
+      - '\.env'
+      - '/id_rsa'
+      - '/id_ed25519'
+      - '/lab.db'
+      - '\lab.db'
+      - '/app.py'
+      - '\app.py'
+      - '/etc/shadow'
+      - '/etc/passwd'
+  condition: selection_processo and selection_arquivo
+falsepositives:
+  - O próprio app abrindo o lab.db (filtre pelo caminho completo esperado depois de ver o primeiro alerta)
+  - O interpretador carregando o app.py na inicialização
+level: medium
+# NIST CSF 2.0: PR.DS, DE.CM  |  CIS Controls v8.1: 3, 8

@@ -1,0 +1,43 @@
+title: Path traversal no parâmetro file da rota /download
+id: 9f6a72ee-4ef4-4a0b-b811-81c8798f92b9
+status: experimental
+description: |
+  Hipótese: quem tenta explorar o path traversal do /download do lab/app.py manda
+  sequências de subida de diretório (../ ou codificadas) no parâmetro file,
+  para ler arquivos fora da pasta files/ (código, banco, chaves).
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://cwe.mitre.org/data/definitions/22.html
+author: DIO Agent SecOps Expert
+date: 2026-11-02
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.credential-access
+  - attack.t1552.001
+logsource:
+  category: webserver
+detection:
+  selection_rota:
+    cs-uri-stem|endswith: '/download'
+  selection_traversal:
+    cs-uri-query|contains:
+      - '../'
+      - '..\'
+      - '..%2f'
+      - '..%2F'
+      - '%2e%2e'
+      - '%2E%2E'
+      - '..%5c'
+      - '..%5C'
+  selection_absoluto:
+    cs-uri-query|contains:
+      - 'file=/'
+      - 'file=%2f'
+      - 'file=%2F'
+      - 'file=C:'
+  condition: selection_rota and (selection_traversal or selection_absoluto)
+falsepositives:
+  - Nenhum esperado; nomes de arquivo legítimos não têm '..' nem caminho absoluto
+level: high
+# NIST CSF 2.0: PR.AA, DE.CM  |  CIS Controls v8.1: 8, 13, 16

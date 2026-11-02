@@ -1,0 +1,37 @@
+title: Separador de comando no parâmetro host da rota /ping
+id: e946e63d-549a-484a-bae0-1d7a4b5034d3
+status: experimental
+description: |
+  Hipótese: quem tenta explorar o command injection do /ping do lab/app.py manda
+  separadores de comando (; | & $( `) no parâmetro host. O log de acesso do servidor
+  web ou do proxy registra isso antes de qualquer processo ser criado.
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://cwe.mitre.org/data/definitions/78.html
+author: DIO Agent SecOps Expert
+date: 2026-11-02
+tags:
+  - attack.initial-access
+  - attack.t1190
+logsource:
+  category: webserver
+detection:
+  selection_rota:
+    cs-uri-stem|endswith: '/ping'
+  selection_separador:
+    cs-uri-query|contains:
+      - ';'
+      - '%3B'
+      - '|'
+      - '%7C'
+      - '&&'
+      - '%26%26'
+      - '$('
+      - '%24%28'
+      - '`'
+      - '%60'
+  condition: selection_rota and selection_separador
+falsepositives:
+  - Varreduras autorizadas do próprio time no laboratório
+level: medium
+# NIST CSF 2.0: DE.CM, DE.AE  |  CIS Controls v8.1: 8, 13
