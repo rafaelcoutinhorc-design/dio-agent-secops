@@ -1,6 +1,6 @@
-# NIST — CSF 2.0, SSDF e Resposta a Incidentes
+# NIST — CSF 2.0, SSDF, Riscos, Incidentes e NICE
 
-Documentos públicos e gratuitos do NIST (https://www.nist.gov/cyberframework e https://csrc.nist.gov).
+Documentos públicos e gratuitos do NIST (https://www.nist.gov/cyberframework e https://csrc.nist.gov). São a **base principal** do agente.
 
 ## NIST Cybersecurity Framework (CSF) 2.0 — fev/2024
 
@@ -19,10 +19,11 @@ Novidade da 2.0: a função **Govern** e a gestão de riscos da cadeia de suprim
 
 ### Atalhos de mapeamento
 
-- Vulnerabilidade de código → **PR.PS** (plataforma/software seguro) e **ID.RA** (vulnerabilidades identificadas)
-- Senha/autenticação → **PR.AA**
-- Criptografia, vazamento → **PR.DS**
-- Regra de detecção / hunting → **DE.CM** e **DE.AE**
+- Vulnerabilidade de código ou configuração insegura → **PR.PS** (plataforma/software seguro) e **ID.RA** (vulnerabilidades identificadas)
+- Senha, autenticação, autorização → **PR.AA**
+- Criptografia, vazamento, dado sensível em log → **PR.DS**
+- Rede exposta, segmentação, TLS → **PR.IR**
+- Regra de detecção / hunting / logs → **DE.CM** e **DE.AE**
 - Triagem e contenção → **RS.MA**, **RS.AN**, **RS.MI**
 - Lições aprendidas → **ID.IM**
 
@@ -35,21 +36,18 @@ Quatro grupos de práticas para desenvolvimento seguro:
 - **PW — Produce Well-Secured Software:** destaque para **PW.5** (codificar seguindo práticas seguras), **PW.7** (revisar/analisar código), **PW.8** (testar o executável), **PW.9** (configuração segura por padrão).
 - **RV — Respond to Vulnerabilities:** identificar, tratar e analisar causa raiz.
 
-Use o SSDF quando o achado for de desenvolvimento: ele complementa o controle 8.28 da ISO 27001.
+Use o SSDF quando o achado for de desenvolvimento ou de pipeline (DevSecOps). Ele complementa o CIS Controls 16.
+
+## NIST SP 800-30 Rev. 1 — Avaliação de riscos
+
+Define risco como a combinação de **probabilidade** de um evento adverso e o **impacto** que ele causaria. É a base da matriz de risco do agente, descrita em `risk-scoring.md`.
 
 ## NIST SP 800-61 Rev. 3 — abr/2025
 
-Recomendações de resposta a incidentes, agora organizadas pelas funções do CSF 2.0 (em vez do antigo ciclo de 4 fases da Rev. 2: preparação; detecção e análise; contenção, erradicação e recuperação; pós-incidente). Útil para montar playbooks do SOC que usam o Defender XDR.
+Recomendações de resposta a incidentes, agora organizadas pelas funções do CSF 2.0 (em vez do antigo ciclo de 4 fases da Rev. 2: preparação; detecção e análise; contenção, erradicação e recuperação; pós-incidente). Útil para montar playbooks de triagem para as regras de detecção.
 
-## Equivalência rápida ISO 27001 ↔ NIST CSF 2.0
+## NICE Framework — NIST SP 800-181 Rev. 1
 
-| ISO 27001:2022 | NIST CSF 2.0 |
-|----------------|--------------|
-| 5.15, 5.17, 8.2, 8.5 | PR.AA |
-| 8.24, 8.11, 8.12 | PR.DS |
-| 8.9, 8.25, 8.28, 8.29 | PR.PS |
-| 8.8 | ID.RA |
-| 8.15, 8.16 | DE.CM, DE.AE |
-| 5.24 a 5.28 | RS.MA, RS.AN, RS.MI, ID.IM |
+Catálogo público de **papéis de trabalho** (work roles), conhecimentos e habilidades em cibersegurança. Usado pela skill `cyber-study-path` para montar trilhas de estudo ligadas a papéis reais do mercado (ex.: desenvolvimento seguro, defesa e monitoramento, gestão de riscos). Confira os nomes atuais dos papéis em https://niccs.cisa.gov antes de citar.
 
-O NIST mantém mapeamentos oficiais (Informative References) no site do CSF. A tabela acima é um atalho didático, não um mapeamento oficial.
+O NIST mantém mapeamentos oficiais (Informative References) no site do CSF. Equivalências com CIS Controls e ISO 27001 estão em `frameworks-referencia.md`.
