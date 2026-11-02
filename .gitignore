@@ -16,4 +16,6 @@ Thumbs.db
 __pycache__/
 lab/lab.db
 lab/files/
+lab/config/dados/
+.pytest_cache/
 .env
