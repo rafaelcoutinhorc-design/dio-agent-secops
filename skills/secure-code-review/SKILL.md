@@ -1,15 +1,15 @@
 ---
 name: secure-code-review
-description: Use quando o estudante pedir para analisar um código (ex. lab/app.py) em busca de vulnerabilidades. Faz perguntas de contexto, aponta achados com CWE e severidade, propõe correção, detecção no Microsoft Defender (KQL) e o controle ISO 27001 / NIST CSF correspondente.
+description: Use quando o estudante pedir para analisar código ou configuração (ex. lab/app.py, lab/config/, lab/infra/) ou uma alteração (diff) em busca de vulnerabilidades. Faz perguntas de contexto, classifica achados por impacto × probabilidade, propõe correção, detecção (regra Sigma ou log) e o controle NIST CSF / CIS correspondente.
 ---
 
-# Skill: Revisão de código seguro
+# Skill: Revisão de código e configuração seguros
 
-Revisa código com o olhar de AppSec + SOC + GRC: cada vulnerabilidade vira **correção**, **detecção** e **controle**.
+Revisa código e configuração com o olhar de AppSec + detecção + governança: cada vulnerabilidade vira **correção**, **detecção** e **controle**, sempre no formato padrão de `agent/knowledge/risk-scoring.md`.
 
 ## Quando usar
 
-O estudante cola um código, aponta um arquivo (ex.: `lab/app.py`) ou pergunta "esse código é seguro?". Se o pedido for só sobre KQL, use `defender-threat-hunting`; se for só sobre norma, use `compliance-mapping`.
+O estudante cola um código ou arquivo de configuração, aponta um arquivo (ex.: `lab/app.py`, `lab/config/docker-compose.yml`, `lab/infra/sshd_config`), pede para revisar uma alteração (`/revisar-alteracao`) ou pergunta "isso é seguro?". Se o pedido for só sobre detecção, use `threat-hunting`; se for só sobre framework, use `compliance-mapping`; se for para provar a falha com teste, use `security-testing`.
 
 ## Processo
 
@@ -19,48 +19,61 @@ Se não estiver claro, pergunte se o código é do próprio estudante e se roda 
 
 ### 2. Perguntas de contexto (uma por vez)
 
-Faça no máximo 4, nesta ordem, e pule as que o código já responde:
+Faça no máximo 4, nesta ordem, e pule as que o arquivo já responde:
 
 1. **Exposição:** onde isso roda? (só `localhost`, rede interna, internet)
 2. **Dados:** que dados passam por aqui? (pessoais/LGPD, financeiros, credenciais, nenhum sensível)
 3. **Usuários:** quem acessa? (anônimos, usuários logados, só admins)
-4. **Monitoramento:** o host tem Microsoft Defender for Endpoint? Há meta de ISO 27001 ou NIST?
+4. **Monitoramento e meta:** que telemetria existe (log da aplicação, log do servidor web, criação de processos, SIEM que aceita regras Sigma)? Há meta de adequação a algum framework (NIST CSF, CIS Controls)?
 
-Se o estudante disser "pode seguir", registre as suposições em uma linha (ex.: "Suponho: exposto à internet, dados pessoais, sem Defender") e continue.
+Se o estudante disser "pode seguir", registre as suposições em uma linha (ex.: "Suponho: internet, anônimos, credenciais, só log da aplicação, meta NIST CSF") e continue.
 
-### 3. Leia o código inteiro
+### 3. Leia o arquivo inteiro
 
-Leia o arquivo completo antes de opinar. Procure, no mínimo: injeções (SQL, comando, template), autenticação e autorização, segredos no código, criptografia, deserialização, manipulação de arquivos, configuração (debug, bind de rede) e logging. Em apps web, inclua o hardening HTTP: flags de cookie (`HttpOnly`, `Secure`, `SameSite`), proteção CSRF, cabeçalhos de segurança (CSP, `X-Content-Type-Options`) e escape de saída. Use `agent/knowledge/cwe-owasp-quickref.md`.
+Leia tudo antes de opinar. Use `agent/knowledge/cwe-owasp-quickref.md`.
 
-### 4. Entregue a tabela de achados
+- **Código:** injeções (SQL, comando, template), autenticação e autorização, segredos no código, criptografia, deserialização, manipulação de arquivos, configuração (debug, bind de rede) e logging. Em apps web, inclua o hardening HTTP: flags de cookie (`HttpOnly`, `Secure`, `SameSite`), proteção CSRF, cabeçalhos de segurança (CSP, `X-Content-Type-Options`) e escape de saída. Confira também SSRF (o servidor fazendo requisições para destinos escolhidos pelo usuário), comparação de segredos sem tempo constante e injeção de log (quebras de linha da entrada indo para o log).
+- **Configuração e infraestrutura:** privilégios (root, `privileged`, socket do runtime), portas e interfaces expostas, senhas padrão ou em texto claro, versões não fixadas, TLS, listagem de diretório, banners de versão, autenticação remota (SSH), limites de recursos e de tentativas.
 
-Ordene por severidade. Uma linha por achado:
+### 4. Entregue a tabela de achados (formato padrão)
 
-| # | Local | Achado | CWE | Severidade (contexto) | ISO 27001 | NIST CSF |
-|---|-------|--------|-----|-----------------------|-----------|----------|
+Use exatamente a tabela de `agent/knowledge/risk-scoring.md`, ordenada pelo risco:
 
-Severidade: Crítica, Alta, Média ou Baixa, sempre ajustada ao contexto do passo 2, com uma frase de justificativa.
+| # | Local | Achado | CWE | Impacto | Prob. | Risco (I×P) | Severidade | NIST CSF | CIS |
+|---|-------|--------|-----|---------|-------|-------------|------------|----------|-----|
 
-### 5. Detalhe os 3 mais graves
+Abaixo da tabela, justifique em uma frase as notas que não forem óbvias e diga como a severidade mudaria em outro contexto.
+
+### 5. Detalhe os 3 de maior risco
 
 Para cada um:
 
 - **Por que é vulnerável** (em linguagem simples) e **o que um atacante conseguiria** (impacto, sem exploit pronto).
-- **Correção:** trecho curto do código corrigido.
-- **Detecção:** uma consulta KQL de Advanced Hunting que pegaria a exploração no host, ou o log que a aplicação deveria gerar. Siga `agent/knowledge/defender-xdr-hunting.md`.
-- **Evidência para auditoria:** o que provaria que o controle está implementado (ex.: PR com a correção + teste automatizado + regra de detecção ativa).
+- **Correção:** trecho curto do código ou da configuração corrigidos.
+- **Detecção:** uma regra Sigma que pegaria a exploração, ou o log que a aplicação deveria gerar. Siga `agent/knowledge/threat-hunting-sigma.md` e reaproveite `lab/hunting/` quando couber.
+- **Evidência:** o que provaria que o controle está implementado (ex.: commit com a correção + teste automatizado + regra Sigma versionada e ativa).
 
 ### 6. Plano de ação
 
-Feche com no máximo 5 ações priorizadas: **agora** (crítico), **esta sprint**, **processo** (ex.: SAST no pipeline, revisão de código obrigatória — ISO 8.25/8.29, SSDF PW.7).
+Feche com no máximo 5 ações priorizadas: **agora** (crítico), **esta sprint**, **processo** (ex.: SAST e busca de segredos no pipeline, revisão obrigatória de alterações — NIST SSDF PW.7, CIS Controls 16).
 
 ### 7. Verifique o entendimento
 
 Proponha um exercício: "Corrija o achado #1 e me mostre o diff" ou "Explique para um gestor, em 2 frases, o risco do achado #2".
 
+## Modo alteração (DevSecOps)
+
+Quando a entrada for um **diff** (comando `/revisar-alteracao`):
+
+1. Analise só as linhas adicionadas ou alteradas, lendo o arquivo em volta para entender o contexto.
+2. Pule as perguntas de contexto já respondidas na conversa; se não houver nenhuma, declare as suposições.
+3. Entregue a tabela padrão só com achados **introduzidos ou corrigidos** pela alteração.
+4. Dê um **veredito**: ✅ aprovar, ⚠️ aprovar com ressalvas (achados Baixa/Média) ou ⛔ bloquear (qualquer achado Alta/Crítica introduzido).
+5. Se a alteração corrigiu uma falha, diga qual teste de `security-testing` provaria a correção.
+
 ## Lembre-se
 
-- Não invente linha nem CWE: cite o que está no código.
+- Não invente linha nem CWE: cite o que está no arquivo.
 - Explique a exploração no nível conceitual; nada de payload pronto para uso contra terceiros.
 - Um achado sem correção nem detecção está incompleto.
-- Não chame tudo de crítico.
+- A matriz existe para priorizar: não chame tudo de crítico.
