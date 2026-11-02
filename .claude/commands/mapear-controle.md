@@ -1,5 +1,5 @@
 ---
-description: Mapeia um risco ou achado para ISO/IEC 27001:2022 e NIST CSF 2.0, com evidências de auditoria
+description: Mapeia um risco ou achado para NIST CSF 2.0 e CIS Controls v8.1, com evidências
 argument-hint: [risco, achado ou processo]
 ---
 
